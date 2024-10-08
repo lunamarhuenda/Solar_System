@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursos para el profesorado</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins';
+            font-size: 22px;
+            color: white;
+            background-image: url('fotos_recursos/fondo.webp'); /* Ruta de la imagen de fondo */
+            background-size: cover; /* Cubrir toda la pantalla */
+            background-position: center; /* Centrar la imagen */
+            display: flex; /* Usar flexbox para centrar contenido */
+            flex-direction: column; /* Dirección de la columna */
+            align-items: center; /* Centrar horizontalmente */
+            justify-content: center; /* Centrar verticalmente */
+            height: 100vh; /* Altura del viewport */
+        }
+        h1 {
+            font-size: 2.5em; /* Tamaño del título */
+            margin-bottom: 20px; /* Espacio debajo del título */
+        }
+        .documento {
+            margin: 10px; /* Margen entre los documentos */
+            padding: 15px; /* Padding interno */
+            border: 1px solid white; /* Borde blanco */
+            border-radius: 8px; /* Bordes redondeados */
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+            width: 300px; /* Ancho fijo para los enlaces */
+            text-align: center; /* Centrar texto */
+            transition: transform 0.3s; /* Transición suave para el efecto de hover */
+            display: inline-block; /* Permitir que el área sea clicable */
+        }
+        .documento:hover {
+            transform: scale(1.05); /* Agrandar un poco al hacer hover */
+        }
+        a {
+            color: white; /* Color del texto */
+            text-decoration: none; /* Sin subrayado */
+            font-size: 1.2em; /* Tamaño de la fuente */
+            display: block; /* Hacer el enlace ocupando todo el espacio del contenedor */
+            height: 100%; /* Asegurarse de que el enlace ocupa todo el alto del contenedor */
+        }
+        a:hover {
+            text-decoration: underline; /* Subrayar en hover */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Recursos para el profesorado</h1>
+
+    <div class="documento">
+        <a href="recursos_pdfs/Examen_Sistema_Solar.pdf" download>Test de 20 preguntas</a>
+    </div>
+    <div class="documento">
+        <a href="recursos_pdfs/Respuestas_Examen_Sistema_Solar.pdf" download>Solución Test</a>
+    </div>
+    <div class="documento">
+        <a href="recursos_pdfs/NASA_solar_system_lithograph_set_h.pdf" download>Recursos adicionales</a>
+    </div>
+
+</body>
+</html>

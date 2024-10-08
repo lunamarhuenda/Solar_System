@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/jpg" href="fotos_recursos/Aerospace_Engineering_Logo.png">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <title>Starship: Solar System</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'San Francisco';
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            margin: auto;
+        }
+        #controls {
+            position: absolute;
+            top: 75px;
+            left: 30px; /* Cambiado para posicionar a la derecha */
+            z-index: 100;
+            background-color: #89b1d8;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            width: 250px;
+        }
+        #controls h2 {
+            margin: 0;
+            font-size: 24px;
+            text-align: center;
+            color: #FF6347; /* Tomate */
+            font-family: 'San Francisco';
+        }
+        #controls label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333333;
+            cursor: pointer; /* Cambia el cursor al pasar por encima */
+            font-family: 'San Francisco';
+        }
+        #controls input {
+            margin-right: 10px;
+            transform: scale(1.5);
+            cursor: pointer; /* Cambia el cursor al pasar por encima */
+        }
+        #controls button {
+            background-color: #FF6347; /* Tomate */
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            margin: 10px auto;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            font-family: 'Poppins';
+        }
+        #controls button:hover {
+            background-color: #FF4500; /* Naranja oscuro */
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Poppins';
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        #pauseButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        #kahootButton {
+            background-color: #538dca68;
+            color: white;
+        }
+        #gameButton {
+            background-color: #538dca68;
+            color: white;
+        }
+        #redirectButton {
+            background-color: #538dca68;
+            color: white;
+        }
+        #vistaTierraButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        #vistaPlanaButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        #resetButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        #gamePrompt {
+            position:absolute;
+            top: 75px;
+            align-self: center;
+            color:#FF4500;
+            font-size: 20px;
+            font-family: 'Poppins';
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        #pauseButton:hover {
+            background-color: #063010;
+        }
+        #kahootButton:hover {
+            background-color: #12283f
+        }
+        #gameButton:hover {
+            background-color: #12283f
+        }
+        #redirectButton:hover {
+            background-color: #12283f;
+        }
+        #vistaTierraButton:hover {
+            background-color: #063010;
+        }
+        #vistaPlanaButton:hover {
+            background-color: #063010;
+        }
+        #resetButton:hover {
+            background-color: #063010;
+        }
+        .menu-container {
+            position: fixed;
+            top: 50px;
+            background-color: #838d9800;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-family: 'Poppins';
+        }
+        .menu-left {
+            right: 30px;
+            top: 45%;
+        }
+        .menu-right {
+            right: 30px;
+            top:10%;
+        }
+        .menu-controles{
+            left: 30px;
+            top: 10%;
+        }
+        .dropdown-menu {
+            display: none;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        .toggle-button {
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            padding: 5px; /* Reduce el espacio interno */
+            width: 20px; /* Ajusta el ancho */
+            height: 20px; /* Ajusta la altura */
+            font-size: 10px; /* Disminuye el tamaño del texto, si es necesario */
+            display: inline-flex; /* Alineación y tamaño compacto */
+            align-items: center; /* Centra verticalmente */
+            justify-content: center; /* Centra horizontalmente */
+        }
+        .menu-title {
+            font-size: 25px;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        .header-container {
+            display: flex;
+            align-items: center; /* Vertically centers image and heading */
+            justify-content: center; /* Horizontally centers the content */
+            text-align: center;
+            margin: auto
+        }
+        .header-container img {
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px; /* Space between image and heading */
+            vertical-align: middle; /* Aligns the image with the text's baseline */
+        }
+        .header-container h1 {
+            margin: 0; /* Remove default margin */
+            font-size: 32px; /* Adjust size if needed */
+            vertical-align: middle; /* Ensures text aligns with the image */
+            font-family: 'Poppins';
+        }
+                   /* Estilos para el tooltip */
+                   #tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            pointer-events: none;
+            display: none;
+            font-size: 14px;
+            max-width: 200px;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        }
+
+        /* Estilos para la sección de información del planeta */
+        #planetInfo {
+            position: absolute;
+            top: 60%;
+            left: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            max-width: 300px;
+            display: none; /* Oculto por defecto */
+            z-index: 1001;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-size: 20px;
+            font-family: 'Poppins';
+        }
+
+        #planetInfo h2 {
+            margin-top: 0;
+            font-size: 20px;
+            border-bottom: 1px solid #fff;
+            padding-bottom: 5px;
+        }
+
+        #planetInfo p {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Botón para cerrar la sección de información */
+        #closeInfo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #closeInfo:hover {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <img src="fotos_recursos/Aerospace_Engineering_Logo.png">
+        <h1>AVENTURA POR EL SISTEMA SOLAR</h1>
+    </div>
+
+    <!-- Menú Controles -->
+    <div class="menu-container menu-controles">
+        <div style="display: flex; align-items: center;">
+            <div class="menu-title">Controles</div>
+            <button id="toggle-button-controles" class="toggle-button">▼</button>
+        </div>
+        <div id="dropdown-menu-controles" class="dropdown-menu">
+            <label>
+                <input type="checkbox" id="sunLayer" checked>  Mostrar Sol
+            </label>
+            <label>
+                <input type="checkbox" id="earthLayer" checked>  Mostrar Tierra y Luna
+            </label>
+            <label>
+                <input type="checkbox" id="mercuryLayer" checked>  Mostrar Mercurio
+            </label>
+            <label>
+                <input type="checkbox" id="venusLayer" checked>  Mostrar Venus
+            </label>
+            <label>
+                <input type="checkbox" id="marsLayer" checked>  Mostrar Marte
+            </label>
+            <label>
+                <input type="checkbox" id="jupiterLayer" checked>  Mostrar Júpiter
+            </label>
+            <label>
+                <input type="checkbox" id="saturnLayer" checked>  Mostrar Saturno
+            </label>
+            <label>
+                <input type="checkbox" id="uranusLayer" checked>  Mostrar Urano
+            </label>
+            <label>
+                <input type="checkbox" id="neptuneLayer" checked>  Mostrar Neptuno
+            </label>
+            <label>
+                <input type="checkbox" id="plutoLayer" checked>  Mostrar Plutón
+            </label>
+        </div>
+    </div>
+
+    <!-- Menú Vistas -->
+    <div class="menu-container menu-left">
+        <div style="display: flex; align-items: center;">
+            <div class="menu-title">Vistas</div>
+            <button id="toggle-button-left" class="toggle-button">▼</button>
+        </div>
+        <div id="dropdown-menu-left" class="dropdown-menu">
+            <button id="pauseButton">Pausar Simulación</button>
+            <button id="vistaTierraButton">Vista Tierra!</button>
+            <button id="vistaPlanaButton">Vista Plana</button>
+            <button id="resetButton">Reiniciar Vista</button>
+        </div>
+    </div>
+
+    <!-- Menú Adicional -->
+    <div class="menu-container menu-right">
+        <div style="display: flex; align-items: center;">
+            <div class="menu-title">Aprende más!</div>
+            <button id="toggle-button-right" class="toggle-button">▼</button>
+        </div>
+        <div id="dropdown-menu-right" class="dropdown-menu">
+            <button id="kahootButton">Kahoot!</button>
+            <button id="redirectButton">Recursos Profesorado</button>
+            <button id="gameButton">Jugar!</button>
+        </div>
+    </div>
+
+    <!-- Prompt para el juego -->
+    <div id="gamePrompt" class="prompt"></div>
+
+    <!-- Tooltip para mostrar la descripción de los planetas -->
+    <div id="tooltip"></div>
+
+    <!-- Sección para mostrar información detallada del planeta -->
+    <div id="planetInfo">
+        <button id="closeInfo">&times;</button>
+        <h2 id="planetName">Nombre del Planeta</h2>
+        <p id="planetDescription">Descripción del planeta.</p>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Crear la escena, la cámara y el renderizador
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        //renderer.setClearColor('textures/stars.jpg'); // Cambiar color de fondo a azul oscuro
+        document.body.appendChild(renderer.domElement);
+
+        // Cargar la textura del fondo de estrellas
+        const loader = new THREE.TextureLoader();
+        loader.load('textures/stars.jpg', (texture) => {
+            // Crear una esfera grande que sirva de fondo
+            const geometry = new THREE.SphereGeometry(500, 32, 32); // Puedes ajustar el tamaño aquí
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.BackSide // Asegúrate de que la textura se aplique por dentro
+            });
+            const skybox = new THREE.Mesh(geometry, material);
+            scene.add(skybox); // Agregar el skydome a la escena
+        });
+
+        
+        // Controles de la cámara para rotar y hacer zoom
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = true;
+
+        // Añadir luz ambiental para iluminar todo
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        // Luz direccional para simular el brillo del Sol
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+
+        // Cargar textura para sistema solar
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load('textures/earth.jpg'); // URL de la textura
+        const sunTexture = textureLoader.load('textures/sun.jpg'); // URL de la textura
+        const mercuryTexture = textureLoader.load('textures/mercury.jpg'); // URL de la textura
+        const venusTexture = textureLoader.load('textures/venus.jpg'); // URL de la textura
+        const marsTexture = textureLoader.load('textures/mars.jpg'); // URL de la textura
+        const jupiterTexture = textureLoader.load('textures/jupiter.jpg'); // URL de la textura
+        const saturnTexture = textureLoader.load('textures/saturn.jpg'); // URL de la textura
+        const uranusTexture = textureLoader.load('textures/uranus.jpg'); // URL de la textura
+        const neptuneTexture = textureLoader.load('textures/neptune.jpg'); // URL de la textura
+        const plutoTexture = textureLoader.load('textures/pluto.jpg'); // URL de la textura
+        const moonTexture = textureLoader.load('textures/moon.jpg'); // URL de la textura
+
+        // Funcionalidad Juego
+        let currentPlanet = null;  // Stores the planet that needs to be clicked
+        const planets = ['Mercurio', 'Venus', 'Tierra', 'Luna', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'];
+        const gamePrompt = document.getElementById("gamePrompt");
+        let gameActive = false;
+
+        function startGame() {
+            gameActive = !gameActive;
+            if (gameActive) {
+                pickRandomPlanet();
+            }
+            if (!gameActive) {
+                gamePrompt.textContent = '';
+            }
+        }
+
+        function pickRandomPlanet() {
+            const randomIndex = Math.floor(Math.random() * planets.length);
+            currentPlanet = planets[randomIndex];
+            gamePrompt.textContent = `¿Dónde está ${currentPlanet}?`;
+        }
+
+        function handlePlanetClick(clickedPlanetName) {
+            if (!gameActive) return; // If the game is not active, do nothing
+
+            if (clickedPlanetName === currentPlanet) {
+                gamePrompt.textContent = `¡Correcto! Era ${clickedPlanetName}.`;
+                setTimeout(pickRandomPlanet, 2000);  // Pick a new planet after 2 seconds
+            } else {
+                gamePrompt.textContent = `¡Incorrecto: eso es ${clickedPlanetName}. ¡Prueba otra vez!`;
+            }
+        }
+
+        // Arrays: Sol, Tierra, Venus
+        const celestialBodies = [
+            { name: 'Sol', diameter: 10, texture: sunTexture, semiMajorAxis: 0, semiMinorAxis: 0, inclination: 0, speed: 0, orbitsEarth: false },
+            { name: 'Mercurio', diameter: 1, texture: mercuryTexture, semiMajorAxis: 10, semiMinorAxis: 10, inclination: 12, speed: 1, orbitsEarth: false },
+            { name: 'Venus', diameter: 2, texture: venusTexture, semiMajorAxis: 13, semiMinorAxis: 13, inclination: 3.4, speed: 0.9, orbitsEarth: false },
+            { name: 'Tierra', diameter: 2.4, texture: earthTexture, semiMajorAxis: 18, semiMinorAxis: 18, inclination: 0, speed: 0.8, orbitsEarth: false },
+            { name: 'Luna', diameter: 1, texture: moonTexture, semiMajorAxis: 2, semiMinorAxis: 2, inclination: 0, speed: 1.1, orbitsEarth: true },
+            { name: 'Marte', diameter: 1.6, texture: marsTexture, semiMajorAxis: 25, semiMinorAxis: 25, inclination: 6.9, speed: 0.4, orbitsEarth: false },
+            { name: 'Júpiter', diameter: 5, texture: jupiterTexture, semiMajorAxis: 32, semiMinorAxis: 32, inclination: 1.3, speed: 0.15, orbitsEarth: false },
+            { name: 'Saturno', diameter: 4, texture: saturnTexture, semiMajorAxis: 39, semiMinorAxis: 39, inclination: 2.5, speed: 0.1, orbitsEarth: false },
+            { name: 'Urano', diameter: 3.4, texture: uranusTexture, semiMajorAxis: 45, semiMinorAxis: 45, inclination: 0.8, speed: 0.05, orbitsEarth: false },
+            { name: 'Neptuno', diameter: 3.4, texture: neptuneTexture, semiMajorAxis: 55, semiMinorAxis: 55, inclination: 1.8, speed: 0.08, orbitsEarth: false },
+            { name: 'Plutón', diameter: 1, texture: plutoTexture, semiMajorAxis: 70, semiMinorAxis: 70, inclination: 10, speed: 0.08, orbitsEarth: false },
+        ];
+
+        const bodies = {};
+
+        // Función para dibujar una órbita como elipse
+        function drawOrbit(semiMajorAxis, semiMinorAxis, center, inclination) {
+            const curve = new THREE.EllipseCurve(
+                center.x, center.z,             // Centro de la órbita
+                semiMajorAxis, semiMinorAxis,   // Radios de los ejes mayor y menor
+                0, 2 * Math.PI,                 // Ángulo de inicio y fin (orbita completa)
+                false,                          // Sentido de la órbita (horario o antihorario)
+                0                               // Rotación inicial
+            );
+
+            // Crear los puntos de la elipse
+            const points = curve.getPoints(100); // 100 puntos para mayor suavidad
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            // Material para la línea de la órbita
+            const material = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                opacity: 0.3,
+                transparent: true
+            });
+
+            // Crear la línea de la órbita
+            const orbit = new THREE.Line(geometry, material);
+            orbit.rotation.x = Math.PI / 2 - THREE.Math.degToRad(inclination);  // Rotar la órbita para que esté en el plano XZ
+            
+            return orbit;
+        }
+
+        // Loop para crear objetos
+        celestialBodies.forEach(body => {
+            const geometry = new THREE.SphereGeometry(body.diameter/2, 32, 32);
+            const material = new THREE.MeshStandardMaterial({ map: body.texture });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+
+            scene.add(mesh);
+
+            // Hacer el planeta clickable
+            mesh.userData = { name: body.name };    // Guardar el nombre del cuerpo celeste
+            scene.add(mesh);
+
+            mesh.callback = () => {
+                handlePlanetClick(body.name);  // Call the game logic function when a planet is clicked
+            };
+
+            // Almacenar el cuerpo en el objeto 'bodies' con su nombre
+            bodies[body.name] = {
+                mesh,
+                semiMajorAxis: body.semiMajorAxis,
+                semiMinorAxis: body.semiMinorAxis,
+                inclination: body.inclination,
+                speed: body.speed,
+                orbitsEarth: body.orbitsEarth,  // Marcar si es un satélite de la Tierra
+                orbit: null                     // Inicializar la órbita
+            };
+
+            // Dibujar la órbita solo si tiene un semieje mayor distinto de 0 (para evitar el Sol)
+            if (body.name !== 'Luna') {
+                const orbit = drawOrbit(body.semiMajorAxis, body.semiMinorAxis, { x: 0, z: 0 }, body.inclination);
+                scene.add(orbit);
+                bodies[body.name].orbit = orbit;    // Guardar referencia a la órbita
+            }
+        });
+
+        // Función para actualizar la visibilidad según la selección del usuario
+        function updateVisibility() {
+            const showSun = document.getElementById('sunLayer').checked;
+            const showEarth = document.getElementById('earthLayer').checked;
+            const showMoon = document.getElementById('earthLayer').checked;
+            const showMercury = document.getElementById('mercuryLayer').checked;
+            const showVenus = document.getElementById('venusLayer').checked;
+            const showMars = document.getElementById('marsLayer').checked;
+            const showJupiter = document.getElementById('jupiterLayer').checked;
+            const showSaturn = document.getElementById('saturnLayer').checked;
+            const showUranus = document.getElementById('uranusLayer').checked;
+            const showNeptune = document.getElementById('neptuneLayer').checked;
+            const showPluto = document.getElementById('plutoLayer').checked;
+
+            // Actualizar visibilidad del Sol
+            bodies['Sol'].mesh.visible = showSun;
+            // Actualizar visibilidad de la Tierra
+            bodies['Tierra'].mesh.visible = showEarth;
+            bodies['Tierra'].orbit.visible = showEarth;
+            // Actualizar visibilidad de la Tierra
+            bodies['Luna'].mesh.visible = showMoon;
+            // Actualizar visibilidad de la Mercurio
+            bodies['Mercurio'].mesh.visible = showMercury;
+            bodies['Mercurio'].orbit.visible = showMercury;
+            // Actualizar visibilidad de la Venus
+            bodies['Venus'].mesh.visible = showVenus;
+            bodies['Venus'].orbit.visible = showVenus;
+            // Actualizar visibilidad de la Venus
+            bodies['Marte'].mesh.visible = showMars;
+            bodies['Marte'].orbit.visible = showMars;
+            // Actualizar visibilidad de la Venus
+            bodies['Marte'].mesh.visible = showMars;
+            bodies['Marte'].orbit.visible = showMars;
+            // Actualizar visibilidad de la Venus
+            bodies['Júpiter'].mesh.visible = showJupiter;
+            bodies['Júpiter'].orbit.visible = showJupiter;
+            // Actualizar visibilidad de la Venus
+            bodies['Saturno'].mesh.visible = showSaturn;
+            bodies['Saturno'].orbit.visible = showSaturn;
+            // Actualizar visibilidad de la Venus
+            bodies['Urano'].mesh.visible = showUranus;
+            bodies['Urano'].orbit.visible = showUranus;
+            // Actualizar visibilidad de la Venus
+            bodies['Neptuno'].mesh.visible = showNeptune;
+            bodies['Neptuno'].orbit.visible = showNeptune;
+            // Actualizar visibilidad de la Venus
+            bodies['Plutón'].mesh.visible = showPluto;
+            bodies['Plutón'].orbit.visible = showPluto;
+        }
+
+        // Escuchar los cambios en la visibilidad
+        document.getElementById('sunLayer').addEventListener('change', updateVisibility);
+        document.getElementById('earthLayer').addEventListener('change', updateVisibility);
+        document.getElementById('mercuryLayer').addEventListener('change', updateVisibility);
+        document.getElementById('venusLayer').addEventListener('change', updateVisibility);
+        document.getElementById('marsLayer').addEventListener('change', updateVisibility);
+        document.getElementById('jupiterLayer').addEventListener('change', updateVisibility);
+        document.getElementById('saturnLayer').addEventListener('change', updateVisibility);
+        document.getElementById('uranusLayer').addEventListener('change', updateVisibility);
+        document.getElementById('neptuneLayer').addEventListener('change', updateVisibility);
+        document.getElementById('plutoLayer').addEventListener('change', updateVisibility);
+        document.getElementById("gameButton").addEventListener("click", startGame);
+
+
+        // Posicionar la cámara y alejarla para ver ambos objetos
+        camera.position.set(70, 15, 50);
+        controls.update();          // Asegurar que la cámara y los controles estén sincronizados
+        
+        // Declarar una variable para pausar la simulación
+        let isPaused = false;
+        let time2 = Date.now();     // Start time
+        let pauseTime = 0;          // Time when the simulation is paused
+        let totalPausedTime = 0;    // Total paused duration
+        let animateId;
+        let targetBody = null;
+
+        // Función de animación
+        function animate() {
+            if (!isPaused) {
+                const time = (Date.now() - time2 - totalPausedTime) * 0.001; // Calcular el tiempo total
+
+                Object.keys(bodies).forEach(bodyName => {
+                    const body = bodies[bodyName];
+
+                    // Si el cuerpo no es el Sol (porque el Sol no orbita)
+                    if (body.semiMajorAxis !== 0) {
+                        const rx = body.semiMajorAxis * Math.cos(time * body.speed);
+                        const ry = body.semiMinorAxis * Math.sin(time * body.speed);
+
+                        // Actualizar la posición de los planetas y sus órbitas
+                        if (body.orbitsEarth) {
+                            const earth = bodies['Tierra'];
+                            body.mesh.position.x = earth.mesh.position.x + body.semiMajorAxis * Math.cos(time * body.speed);
+                            body.mesh.position.z = earth.mesh.position.z + body.semiMinorAxis * Math.sin(time * body.speed);
+                            body.mesh.position.y = earth.mesh.position.y + Math.sqrt(Math.pow(body.mesh.position.x, 2) + Math.pow(body.mesh.position.z, 2)) * Math.sin(time * body.speed) * Math.sin(body.inclination * (Math.PI / 180));
+                        } else {
+                            // Actualizar la posición de los planetas con base en su velocidad y órbita alrededor del Sol
+                            body.mesh.position.x = rx;
+                            body.mesh.position.z = ry * Math.cos(body.inclination * (Math.PI / 180));
+                            body.mesh.position.y = ry * Math.sin(body.inclination * (Math.PI / 180));
+                        }
+                    }
+
+                    // Rotar el planeta sobre su propio eje
+                    body.mesh.rotation.y += 0.01; // Velocidad de rotación
+                });
+
+                // Ajustar la cámara si hay un cuerpo objetivo
+                if (targetBody) {
+                    camera.position.lerp(new THREE.Vector3(targetBody.mesh.position.x, 10, targetBody.mesh.position.z + 50), 0.1);
+                    controls.target.lerp(new THREE.Vector3(targetBody.mesh.position.x, 0, targetBody.mesh.position.z), 0.1);
+                    controls.update();
+                }
+
+                // Actualizar controles
+                controls.update();
+            }
+
+            animateId = requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Evento para reiniciar la vista
+        document.getElementById('resetButton').addEventListener('click', () => {
+            camera.position.set(70, 15, 50);
+            controls.target.set(0, 0, 0);
+            controls.update();
+            targetBody = null; // Reiniciar el objetivo
+        });
+
+        // Encontrar intersecciones
+        renderer.domElement.addEventListener('click', (event) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            const mouse = new THREE.Vector2(
+                ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                -((event.clientY - rect.top) / rect.height) * 2 + 1
+            );
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(Object.values(bodies).map(body => body.mesh));
+
+            if (intersects.length > 0) {
+                const clickedBody = intersects[0].object.userData.name; // Obtener el nombre del cuerpo celeste clicado
+                const clickedTargetBody = bodies[clickedBody];
+
+                if (!gameActive) {
+                    if (clickedTargetBody) {
+                        // Alternar el seguimiento del cuerpo celeste
+                        if (targetBody === clickedTargetBody) {
+                            targetBody = null; // Si ya estaba seleccionado, detener el seguimiento
+                        } else {
+                            targetBody = clickedTargetBody; // Establecer el nuevo objetivo
+                        }
+                                            // Mostrar la información del planeta clicado
+                                            if (detailedInfo[clickedBody]) {
+                            planetName.innerText = detailedInfo[clickedBody].name;
+                            planetDescription.innerText = detailedInfo[clickedBody].description;
+
+                            // Mostrar la sección de información
+                            planetInfo.style.display = 'block';
+                        }
+                    }
+                }
+
+                const clickedPlanet = intersects[0].object;
+
+                if (clickedPlanet.callback) {
+                    clickedPlanet.callback();   // Call the planet's click handler
+                }
+            }
+        });
+
+        // Lógica del menú desplegable derecho down
+        const toggleButtonLeft = document.getElementById('toggle-button-left');
+        const dropdownMenuLeft = document.getElementById('dropdown-menu-left');
+
+        toggleButtonLeft.addEventListener('click', () => {
+            const isVisible = dropdownMenuLeft.style.display === 'flex';
+            dropdownMenuLeft.style.display = isVisible ? 'none' : 'flex';
+            toggleButtonLeft.textContent = isVisible ? '▼' : '▲';
+        });
+
+        // Lógica del menú desplegable de los controles
+        const toggleButtonControles = document.getElementById('toggle-button-controles');
+        const dropdownMenuControles = document.getElementById('dropdown-menu-controles');
+
+        toggleButtonControles.addEventListener('click', () => {
+            const isVisible = dropdownMenuControles.style.display === 'flex';
+            dropdownMenuControles.style.display = isVisible ? 'none' : 'flex';
+            toggleButtonControles.textContent = isVisible ? '▼' : '▲';
+        });       
+
+        // Lógica del menú desplegable derecho
+        const toggleButtonRight = document.getElementById('toggle-button-right');
+        const dropdownMenuRight = document.getElementById('dropdown-menu-right');
+
+        toggleButtonRight.addEventListener('click', () => {
+            const isVisible = dropdownMenuRight.style.display === 'flex';
+            dropdownMenuRight.style.display = isVisible ? 'none' : 'flex';
+            toggleButtonRight.textContent = isVisible ? '▼' : '▲';
+        });
+
+        // Lógica del botón de pausar
+        const pauseButton = document.getElementById('pauseButton');
+        pauseButton.addEventListener('click', () => {
+            isPaused = !isPaused; // Cambiar el estado de pausa
+            // Aquí puedes añadir lógica para pausar la simulación
+            if (isPaused) {
+                pauseTime = Date.now();
+                pauseButton.textContent = 'Reanudar Simulación';
+            } else {
+                totalPausedTime += Date.now() - pauseTime;
+                pauseButton.textContent = 'Pausar Simulación';
+            }
+        });
+
+        // Lógica del botón vista Plana
+        const vistaPlanaButton = document.getElementById('vistaPlanaButton');
+        vistaPlanaButton.addEventListener('click', () => {
+            camera.position.set(0, 75, 0);
+            camera.rotation.z += MATH.PI;
+        });
+
+        // Lógica del botón de Kahoot
+        const kahootButton = document.getElementById('kahootButton');
+        kahootButton.addEventListener('click', () => {
+            window.location.href = 'https://create.kahoot.it/share/aventura-en-el-sistema-solar/3467ff7c-084e-46f7-ae99-8bd7ff64f738'; // Redirige a Kahoot
+        });
+        
+        // Ir a otra página
+        document.getElementById('redirectButton').addEventListener('click', () => {
+            window.location.href = 'recursos.html'; // Reemplaza con la URL de la otra página
+        });
+
+        // Ir a otra página
+        document.getElementById('vistaTierraButton').addEventListener('click', () => {
+            window.location.href = 'Earth_View.html'; // Reemplaza con la URL de la otra página
+        });
+
+        // Ajustar el tamaño del renderizador cuando la ventana cambie de tamaño
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+
+        // Descripciones para cada cuerpo celeste (para el tooltip)
+        const descriptions = {
+            'Sol': 'El Sol es la estrella en el centro del sistema solar. Es una enorme esfera de plasma que provee luz y calor a los planetas.',
+            'Mercurio': 'Mercurio es el planeta más cercano al Sol y el más pequeño del sistema solar. Tiene una superficie rocosa y temperaturas extremas.',
+            'Venus': 'Venus es el segundo planeta desde el Sol y es conocido por su atmósfera densa y caliente, compuesta principalmente de dióxido de carbono.',
+            'Tierra': 'La Tierra es el tercer planeta desde el Sol y el único conocido que alberga vida. Tiene una rica diversidad de ecosistemas y agua en estado líquido.',
+            'Luna': 'La Luna es el único satélite natural de la Tierra. Influye en las mareas y tiene una superficie llena de cráteres.',
+            'Marte': 'Marte, conocido como el planeta rojo, tiene una atmósfera delgada y es objeto de exploración por su potencial para albergar vida pasada.',
+            'Júpiter': 'Júpiter es el planeta más grande del sistema solar. Es un gigante gaseoso con una gran mancha roja, una tormenta persistente.',
+            'Saturno': 'Saturno es conocido por sus impresionantes anillos. Es el segundo gigante gaseoso y tiene numerosas lunas.',
+            'Urano': 'Urano es un gigante helado con una inclinación axial extrema, lo que hace que ruede alrededor del Sol.',
+            'Neptuno': 'Neptuno es el planeta más lejano del sistema solar y es conocido por sus fuertes vientos y su color azul intenso.',
+            'Plutón': 'Plutón es un planeta enano situado en el cinturón de Kuiper. Tiene una órbita elíptica y varias lunas.',
+        };
+
+        // Información detallada para cada cuerpo celeste (para la sección de información)
+        const detailedInfo = {
+            'Sol': {
+                name: 'Sol',
+                description: 'El Sol es la estrella en el centro del sistema solar. Es una enorme esfera de plasma que provee luz y calor a los planetas.'
+            },
+            'Mercurio': {
+                name: 'Mercurio',
+                description: 'Mercurio es el planeta más cercano al Sol y el más pequeño del sistema solar. Tiene una superficie rocosa y temperaturas extremas.'
+            },
+            'Venus': {
+                name: 'Venus',
+                description: 'Venus es el segundo planeta desde el Sol y es conocido por su atmósfera densa y caliente, compuesta principalmente de dióxido de carbono.'
+            },
+            'Tierra': {
+                name: 'Tierra',
+                description: 'La Tierra es el tercer planeta desde el Sol y el único conocido que alberga vida. Tiene una rica diversidad de ecosistemas y agua en estado líquido.'
+            },
+            'Luna': {
+                name: 'Luna',
+                description: 'La Luna es el único satélite natural de la Tierra. Influye en las mareas y tiene una superficie llena de cráteres.'
+            },
+            'Marte': {
+                name: 'Marte',
+                description: 'Marte, conocido como el planeta rojo, tiene una atmósfera delgada y es objeto de exploración por su potencial para albergar vida pasada.'
+            },
+            'Júpiter': {
+                name: 'Júpiter',
+                description: 'Júpiter es el planeta más grande del sistema solar. Es un gigante gaseoso con una gran mancha roja, una tormenta persistente.'
+            },
+            'Saturno': {
+                name: 'Saturno',
+                description: 'Saturno es conocido por sus impresionantes anillos. Es el segundo gigante gaseoso y tiene numerosas lunas.'
+            },
+            'Urano': {
+                name: 'Urano',
+                description: 'Urano es un gigante helado con una inclinación axial extrema, lo que hace que ruede alrededor del Sol.'
+            },
+            'Neptuno': {
+                name: 'Neptuno',
+                description: 'Neptuno es el planeta más lejano del sistema solar y es conocido por sus fuertes vientos y su color azul intenso.'
+            },
+            'Plutón': {
+                name: 'Plutón',
+                description: 'Plutón es un planeta enano situado en el cinturón de Kuiper. Tiene una órbita elíptica y varias lunas.'
+            },
+   
+        };
+
+        // Evento para cerrar la sección de información
+        closeInfo.addEventListener('click', () => {
+            planetInfo.style.display = 'none';
+        });
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/jpg" href="fotos_recursos/Aerospace_Engineering_Logo.png">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <title>Starship: Earth View</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'San Francisco';
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            margin: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Poppins';
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        #pauseButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        #vistaSolarButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        #resetButton {
+            background-color: #61986e71;
+            color: white;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        #pauseButton:hover {
+            background-color: #063010;
+        }
+        #vistaSolarButton:hover {
+            background-color: #063010;
+        }
+        #resetButton:hover {
+            background-color: #063010;
+        }
+        .menu-container {
+            position: fixed;
+            top: 75px;
+            left: 30px;
+            background-color: #838d9800;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-family: 'Poppins';
+        }
+        .dropdown-menu {
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        .toggle-button {
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            padding: 5px; /* Reduce el espacio interno */
+            width: 20px; /* Ajusta el ancho */
+            height: 20px; /* Ajusta la altura */
+            font-size: 10px; /* Disminuye el tamaño del texto, si es necesario */
+            display: inline-flex; /* Alineación y tamaño compacto */
+            align-items: center; /* Centra verticalmente */
+            justify-content: center; /* Centra horizontalmente */
+        }
+        .menu-title {
+            font-size: 25px;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        .header-container {
+            display: flex;
+            align-items: center; /* Vertically centers image and heading */
+            justify-content: center; /* Horizontally centers the content */
+            text-align: center;
+            margin: auto
+        }
+        .header-container img {
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px; /* Space between image and heading */
+            vertical-align: middle; /* Aligns the image with the text's baseline */
+        }
+        .header-container h1 {
+            margin: 0; /* Remove default margin */
+            font-size: 32px; /* Adjust size if needed */
+            vertical-align: middle; /* Ensures text aligns with the image */
+            font-family: 'Poppins';
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <img src="fotos_recursos/Aerospace_Engineering_Logo.png">
+        <h1>AVENTURA POR EL SISTEMA SOLAR</h1>
+    </div>
+
+    <div class="menu-container">
+        <div style="display: flex; align-items: center;"> <!-- Cambiado para alinear título y botón -->
+            <div class="menu-title">Vistas</div> <!-- Título del menú -->
+            <button id="toggle-button" class="toggle-button">▼</button> <!-- Flecha al lado del título -->
+        </div>
+        <div id="dropdown-menu" class="dropdown-menu">
+            <button id="pauseButton">Pausar Simulación</button>
+            <a href="Sistema_Solar.html">
+            <button id="vistaSolarButton">Vista Sistema Solar</button>
+            </a>
+            <button id="resetButton">Reiniciar Vista</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Crear la escena, la cámara y el renderizador
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Cargar la textura del fondo de estrellas
+        const loader = new THREE.TextureLoader();
+        loader.load('textures/stars.jpg', (texture) => {
+            // Crear una esfera grande que sirva de fondo
+            const geometry = new THREE.SphereGeometry(500, 32, 32); // Puedes ajustar el tamaño aquí
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.BackSide // Asegúrate de que la textura se aplique por dentro
+            });
+            const skybox = new THREE.Mesh(geometry, material);
+            scene.add(skybox); // Agregar el skydome a la escena
+        });
+
+        // Controles de la cámara para rotar y hacer zoom
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = true;
+
+        // Añadir luz ambiental para iluminar todo
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        // Luz direccional para simular el brillo del Sol
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(100, 100, 100);
+        scene.add(directionalLight);
+
+        // Cargar textura para sistema solar
+        const textureLoader = new THREE.TextureLoader();
+        const sunTexture = textureLoader.load('textures/sun.jpg'); // URL de la textura
+        const earthTexture = textureLoader.load('textures/earth.jpg'); // URL de la textura
+        const moonTexture = textureLoader.load('textures/moon.jpg'); // URL de la textura
+        const asteroidTexture = textureLoader.load('textures/asteroid.jpg'); // URL de la textura
+
+        // Arrays
+        const celestialBodies = [
+            { name: 'Sol', type: 'star', diameter: 11, semiMajorAxis: 0, semiMinorAxis: 0, speed: 0, inclination: 0, orbitsEarth: false },
+            { name: 'Tierra', type: 'planet', diameter: 3, semiMajorAxis: 14.960, semiMinorAxis: 14.95769, speed: 0.3, inclination: 0, orbitsEarth: false},
+            { name: 'Luna', type: 'moon', diameter: 1, semiMajorAxis: 4.84400, semiMinorAxis: 4.83800, speed: 0.4, inclination: 5, orbitsEarth: true},
+
+            {name: '1862 Apollo (1932 HA)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 22.00616, semiMinorAxis: 18.23342813, speed: 0.097879282, inclination: 6.35},
+            {name: '1866 Sisyphus (1972 XA)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 28.33424, semiMinorAxis: 23.88420135, speed: 0.125, inclination: 41.21},
+            {name: '3122 Florence (1981 ET3)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 26.46424, semiMinorAxis: 23.97879778, speed: 0.127221068, inclination: 22.14},
+            {name: '3671 Dionysus (1984 KD)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 32.912, semiMinorAxis: 27.65853674, speed: 0.110893431, inclination: 13.54},
+            {name: '5143 Heracles (1991 VL)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 27.4516, semiMinorAxis: 17.48214363, speed: 0.110852455, inclination: 8.98},
+            {name: '5381 Sekhmet (1991 JY)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 14.1746, semiMinorAxis: 13.53764866, speed: 0.106258634, inclination: 48.97},
+            {name: '5646 (1990 TR)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 32.07424, semiMinorAxis: 28.86976508, speed: 0.09375293, inclination: 7.91},
+            {name: '7088 Ishtar (1992 AA)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 29.63576, semiMinorAxis: 27.28528082, speed: 0.111982083, inclination: 8.3},
+            {name: '7335 (1989 JA)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 26.50912, semiMinorAxis: 23.18847811, speed: 0.115835483, inclination: 15.17},
+            {name: '7888 (1993 UC)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 36.47248, semiMinorAxis: 27.3007754, speed: 0.128369705, inclination: 26.07},
+            {name: '7889 (1994 LX)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 18.87952, semiMinorAxis: 17.71132751, speed: 0.109449106, inclination: 36.91},
+            {name: '15745 Yuliya (1991 PM5)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 25.7312, semiMinorAxis: 24.87715717, speed: 0.092347473, inclination: 14.43},
+            {name: '31345 (1998 PG)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 30.15936, semiMinorAxis: 27.75198282, speed: 0.119222668, inclination: 6.5},
+            {name: '31346 (1998 PB1)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 30.3688, semiMinorAxis: 27.42216728, speed: 0.109657139, inclination: 5.96},
+            {name: '35107 (1991 VH)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 17.00952, semiMinorAxis: 16.83174609, speed: 0.114346699, inclination: 13.91},
+            {name: '53110 (1999 AR7)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 24.59424, semiMinorAxis: 24.02232418, speed: 0.109589041, inclination: 40.63},
+            {name: '65803 Didymos (1996 GT)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 24.57928, semiMinorAxis: 22.70201047, speed: 0.132784491, inclination: 3.41},
+            {name: '66063 (1998 RO1)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 14.82536, semiMinorAxis: 10.28841531, speed: 0.120365912, inclination: 22.69},
+            {name: '66391 Moshup (1999 KW4)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 9.610304, semiMinorAxis: 6.970653931, speed: 0.108518719, inclination: 38.88},
+            {name: '68063 (2000 YJ66)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 34.91664, semiMinorAxis: 31.0464155, speed: 0.09496075, inclination: 5.72},
+            {name: '69230 Hermes (1937 UB)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 24.7588, semiMinorAxis: 19.3491058, speed: 0.021592054, inclination: 6.07},
+            {name: '85628 (1998 KV2)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 23.81632, semiMinorAxis: 22.47046809, speed: 0.106277455, inclination: 13.03},
+            {name: '85938 (1999 DJ4)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 27.72088, semiMinorAxis: 24.24844805, speed: 0.119326996, inclination: 9.14},
+            {name: '88710 (2001 SL9)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 15.87256, semiMinorAxis: 15.28261306, speed: 0.12497917, inclination: 21.9},
+            {name: '136617 (1994 CC)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 24.50448, semiMinorAxis: 22.27340489, speed: 0.125596584, inclination: 4.68},
+            {name: '136993 (1998 ST49)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 34.54264, semiMinorAxis: 27.74745232, speed: 0.130338445, inclination: 24.48},
+            {name: '137170 (1999 HF1)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 12.255232, semiMinorAxis: 10.86572499, speed: 0.12935495, inclination: 25.66},
+            {name: '138095 (2000 DK79)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 26.58392, semiMinorAxis: 24.1926781, speed: 0.07070469, inclination: 60.69},
+            {name: '143649 (2003 QQ47)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 16.2316, semiMinorAxis: 15.94527317, speed: 0.113438705, inclination: 62.1},
+            {name: '153591 (2001 SN263)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 29.74048, semiMinorAxis: 26.09201296, speed: 0.087642419, inclination: 6.69},
+            {name: '153958 (2002 AM31)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 25.47688, semiMinorAxis: 22.73228423, speed: 0.106481153, inclination: 4.64},
+            {name: '162000 (1990 OS)', type: 'asteroid', diameter: 0.25, semiMajorAxis: 25.10288, semiMinorAxis: 22.25800672, speed: 0.11829653, inclination: 1.09},
+            {name: "162483 (2000 PJ5)", type: "asteroid", diameter: 0.25, semiMajorAxis: 13.055592, semiMinorAxis: 12.10970949, speed: 0.113550341, inclination: 51.18},
+            {name: "163693 Atira (2003 CP20)", type: "asteroid", diameter: 0.25, semiMajorAxis: 11.08536, semiMinorAxis: 10.49457296, speed: 0.088287228, inclination: 25.62},
+            {name: "164121 (2003 YT1)", type: "asteroid", diameter: 0.25, semiMajorAxis: 16.6056, semiMinorAxis: 15.88190003, speed: 0.128040973, inclination: 44.06},
+            {name: "175706 (1996 FG3)", type: "asteroid", diameter: 0.25, semiMajorAxis: 15.7828, semiMinorAxis: 14.78394337, speed: 0.083467809, inclination: 1.97},
+            {name: "185851 (2000 DP107)", type: "asteroid", diameter: 0.25, semiMajorAxis: 20.4204, semiMinorAxis: 18.91779791, speed: 0.108092527, inclination: 8.67},
+            {name: "190166 (2005 UP156)", type: "asteroid", diameter: 0.25, semiMajorAxis: 31.67032, semiMinorAxis: 27.95432781, speed: 0.007399734, inclination: 4.21},
+            {name: "190208 (2006 AQ)", type: "asteroid", diameter: 0.25, semiMajorAxis: 30.71288, semiMinorAxis: 26.83666622, speed: 0.001648352, inclination: 4.09},
+            {name: "250162 (2002 TY57)", type: "asteroid", diameter: 0.25, semiMajorAxis: 28.73816, semiMinorAxis: 27.15328435, speed: 0.1199952, inclination: 3.46},
+            {name: "276049 (2002 CE26)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.40568, semiMinorAxis: 27.64922084, speed: 0.091099572, inclination: 47.29},
+            {name: "285263 (1998 QE2)", type: "asteroid", diameter: 0.25, semiMajorAxis: 36.21816, semiMinorAxis: 29.68785056, speed: 0.063171194, inclination: 12.88},
+            {name: "310560 (2001 QL142)", type: "asteroid", diameter: 0.25, semiMajorAxis: 15.69304, semiMinorAxis: 13.59871587, speed: 0.100878653, inclination: 26.6},
+            {name: "311066 (2004 DC)", type: "asteroid", diameter: 0.25, semiMajorAxis: 24.44464, semiMinorAxis: 22.40814749, speed: 0.116690653, inclination: 19.46},
+            {name: "326732 (2003 HB6)", type: "asteroid", diameter: 0.25, semiMajorAxis: 40.57152, semiMinorAxis: 33.32692705, speed: 0.08663009, inclination: 6.62},
+            {name: "348400 (2005 JF21)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.30096, semiMinorAxis: 28.13227554, speed: 0.124228747, inclination: 10.84},
+            {name: "350751 (2002 AW)", type: "asteroid", diameter: 0.25, semiMajorAxis: 16.03712, semiMinorAxis: 15.49973428, speed: 0.064557779, inclination: 0.57},
+            {name: "357439 (2004 BL86)", type: "asteroid", diameter: 0.25, semiMajorAxis: 22.46992, semiMinorAxis: 20.56941384, speed: 0.114481969, inclination: 23.78},
+            {name: "363027 (1998 ST27)", type: "asteroid", diameter: 0.25, semiMajorAxis: 12.264208, semiMinorAxis: 10.40155209, speed: 0.1, inclination: 21.06},
+            {name: "363067 (2000 CO101)", type: "asteroid", diameter: 0.25, semiMajorAxis: 16.09696, semiMinorAxis: 16.03148921, speed: 0.05859375, inclination: 15.32},
+            {name: "363599 (2004 FG11)", type: "asteroid", diameter: 0.25, semiMajorAxis: 23.74152, semiMinorAxis: 16.38686147, speed: 0.042728956, inclination: 3.14},
+            {name: "374851 (2006 VV2)", type: "asteroid", diameter: 0.25, semiMajorAxis: 35.70952, semiMinorAxis: 28.42197037, speed: 0.12371134, inclination: 23.73},
+            {name: "385186 (1994 AW1)", type: "asteroid", diameter: 0.25, semiMajorAxis: 16.5308, semiMinorAxis: 16.48361782, speed: 0.119080697, inclination: 24.1},
+            {name: "399307 (1991 RJ2)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.0616, semiMinorAxis: 29.89444406, speed: 0.08618956, inclination: 8.95},
+            {name: "399774 (2005 NB7)", type: "asteroid", diameter: 0.25, semiMajorAxis: 30.57824, semiMinorAxis: 26.16713552, speed: 0.086004243, inclination: 12.7},
+            {name: "410777 (2009 FD)", type: "asteroid", diameter: 0.25, semiMajorAxis: 17.41344, semiMinorAxis: 15.15118978, speed: 0.075, inclination: 3.13},
+            {name: "450894 (2008 BT18)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.2112, semiMinorAxis: 26.70252437, speed: 0.116722434, inclination: 8.15},
+            {name: "452561 (2005 AB)", type: "asteroid", diameter: 0.25, semiMajorAxis: 48.1712, semiMinorAxis: 36.42041388, speed: 0.089901109, inclination: 8.15},
+            {name: "461852 (2006 GY2)", type: "asteroid", diameter: 0.25, semiMajorAxis: 27.79568, semiMinorAxis: 24.13720245, speed: 0.133333333, inclination: 30.56},
+            {name: "481532 (2007 LE)", type: "asteroid", diameter: 0.25, semiMajorAxis: 27.51144, semiMinorAxis: 23.57095521, speed: 0.115251633, inclination: 29.55},
+            {name: "488453 (1994 XD)", type: "asteroid", diameter: 0.25, semiMajorAxis: 35.06624, semiMinorAxis: 23.8265827, speed: 0.109629088, inclination: 4.33},
+            {name: "489486 (2007 GS3)", type: "asteroid", diameter: 0.25, semiMajorAxis: 15.87256, semiMinorAxis: 15.73973175, speed: 0.085787818, inclination: 15.09},
+            {name: "494658 (2000 UG11)", type: "asteroid", diameter: 0.25, semiMajorAxis: 28.85784, semiMinorAxis: 23.67477144, speed: 0.067567568, inclination: 8.91},
+            {name: "523775 (2014 YB35)", type: "asteroid", diameter: 0.25, semiMajorAxis: 28.07992, semiMinorAxis: 24.5827008, speed: 0.091547147, inclination: 12.64},
+            {name: "539940 (2017 HW1)", type: "asteroid", diameter: 0.25, semiMajorAxis: 31.96952, semiMinorAxis: 28.4012291, speed: 0.113869278, inclination: 33.96},
+            {name: "612098 (1999 RM45)", type: "asteroid", diameter: 0.25, semiMajorAxis: 25.19264, semiMinorAxis: 19.26027729, speed: 0.09772942, inclination: 10.89},
+            {name: "(1994 CJ1)", type: "asteroid", diameter: 0.25, semiMajorAxis: 22.30536, semiMinorAxis: 21.0906556, speed: 0.01, inclination: 2.31},
+            {name: "(2002 BM26)", type: "asteroid", diameter: 0.25, semiMajorAxis: 27.40672, semiMinorAxis: 24.549, speed: 0.111111111, inclination: 16.22},
+            {name: "(2005 LW3)", type: "asteroid", diameter: 0.25, semiMajorAxis: 21.52744, semiMinorAxis: 19.07314552, speed: 0.083333333, inclination: 6.02},
+            {name: "(2007 DT103)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.03168, semiMinorAxis: 27.02962332, speed: 0.116076611, inclination: 5.45},
+            {name: "(2013 PY6)", type: "asteroid", diameter: 0.25, semiMajorAxis: 34.13872, semiMinorAxis: 30.23233277, speed: 0.082774605, inclination: 3.42},
+            {name: "(2013 WT44)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.86944, semiMinorAxis: 27.93608489, speed: 0.10398974, inclination: 12.2},
+            {name: "(2014 WZ120)", type: "asteroid", diameter: 0.25, semiMajorAxis: 33.09152, semiMinorAxis: 25.42944957, speed: 0.089259149, inclination: 20.91},
+            {name: "(2016 AZ8)", type: "asteroid", diameter: 0.25, semiMajorAxis: 19.76216, semiMinorAxis: 18.47347606, speed: 0.017754631, inclination: 5.59},
+            {name: "(2017 RV1)", type: "asteroid", diameter: 0.25, semiMajorAxis: 36.30792, semiMinorAxis: 28.3050059, speed: 0.087057458, inclination: 2.05},
+            {name: "(2017 YE5)", type: "asteroid", diameter: 0.25, semiMajorAxis: 42.20216, semiMinorAxis: 29.7782831, speed: 0.014563107, inclination: 6.22},
+            {name: "(2018 EB)", type: "asteroid", diameter: 0.25, semiMajorAxis: 15.21432, semiMinorAxis: 15.21318771, speed: 0.094936709, inclination: 29.44},
+            {name: "(2018 TF3)", type: "asteroid", diameter: 0.25, semiMajorAxis: 31.89472, semiMinorAxis: 22.2231073, speed: 0.12767044, inclination: 6.87},
+            {name: "(2020 AZ2)", type: "asteroid", diameter: 0.25, semiMajorAxis: 28.13976, semiMinorAxis: 26.08511721, speed: 0.127215673, inclination: 1.83},
+            {name: "(2020 BX12)", type: "asteroid", diameter: 0.25, semiMajorAxis: 23.936, semiMinorAxis: 20.33792087, speed: 0.107142857, inclination: 40.06}
+        ];
+
+        const bodies = {};
+
+        // Función para dibujar una órbita como elipse
+        function drawOrbit(semiMajorAxis, semiMinorAxis, center, inclination) {
+            const curve = new THREE.EllipseCurve(
+                center.x, center.z,             // Centro de la órbita
+                semiMajorAxis, semiMinorAxis,   // Radios de los ejes mayor y menor
+                0, 2 * Math.PI,                 // Ángulo de inicio y fin (orbita completa)
+                false,                          // Sentido de la órbita (horario o antihorario)
+                0                               // Rotación inicial
+            );
+
+            // Crear los puntos de la elipse
+            const points = curve.getPoints(100); // 100 puntos para mayor suavidad
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            // Material para la línea de la órbita
+            const material = new THREE.LineBasicMaterial({
+                color: 0x4284f5,
+                opacity: 0.3,
+                transparent: true
+            });
+
+            // Crear la línea de la órbita
+            const orbit = new THREE.Line(geometry, material);
+            orbit.rotation.x = Math.PI / 2 - THREE.Math.degToRad(inclination); // Rotar la órbita para que esté en el plano XZ
+            
+            return orbit;
+        }
+
+        function getTextureByType(type) {
+            const texture = {
+                star: sunTexture,
+                planet: earthTexture,
+                moon: moonTexture,
+                asteroid: asteroidTexture
+            };
+            return texture[type] || 0xffffff
+        }
+
+        // Loop para crear objetos
+        celestialBodies.forEach(body => {
+            const geometry = new THREE.SphereGeometry(body.diameter/2, 32, 32);
+
+            const material = new THREE.MeshStandardMaterial({ map: getTextureByType(body.type) });
+
+            const mesh = new THREE.Mesh(geometry, material);
+
+            scene.add(mesh);
+
+            // Almacenar el cuerpo en el objeto 'bodies' con su nombre
+            bodies[body.name] = {
+                mesh,
+                semiMajorAxis: body.semiMajorAxis,
+                semiMinorAxis: body.semiMinorAxis,
+                speed: body.speed,
+                orbitsEarth: body.orbitsEarth, // Marcar si es un satélite de la Tierra
+                orbit: null, // Inicializar la órbita
+                inclination: body.inclination
+            };
+
+            // Dibujar la órbita solo si tiene un semieje mayor distinto de 0 (para evitar el Sol)
+            if (body.type !== 'moon') {
+                const orbit = drawOrbit(body.semiMajorAxis, body.semiMinorAxis, { x: 0, z: 0 }, body.inclination);
+                scene.add(orbit);
+                bodies[body.name].orbit = orbit; // Guardar referencia a la órbita
+            }
+        });
+
+        // Posicionar la cámara y alejarla para ver ambos objetos
+        camera.position.set(25, 25, 50);
+        controls.update(); // Asegurar que la cámara y los controles estén sincronizados
+
+        // Declarar una variable para pausar la simulación
+        let isPaused = false;
+        let time2 = Date.now()-2000; // Start time
+        let pauseTime = 0;      // Time when the simulation is paused
+        let totalPausedTime = 0; // Total paused duration
+
+        // Lógica para pausar la simulación
+        const pauseButton = document.getElementById('pauseButton');
+
+        pauseButton.addEventListener('click', () => {
+            isPaused = !isPaused; // Cambiar el estado de pausa
+
+            if (isPaused) {
+                pauseTime = Date.now();
+                pauseButton.textContent = 'Reanudar Simulación';
+            } else {
+                totalPausedTime += Date.now() - pauseTime;
+                pauseButton.textContent = 'Pausar Simulación';
+            }
+        });
+
+        // Función de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            //const time = Date.now() * 0.001;
+
+            if (!isPaused) { 
+                const time = (Date.now() - time2 - totalPausedTime+1000000000) * 0.001;
+                // Solo actualizar la posición si no está pausado
+                // Loop para actualizar la posición de cada planeta y su órbita
+                Object.keys(bodies).forEach(bodyName => {
+                    const body = bodies[bodyName];
+                    // Si el cuerpo no es el Sol (porque el Sol no orbita)
+                    if (body.semiMajorAxis !== 0) {
+                        const rx=body.semiMajorAxis * Math.cos(time * body.speed);
+                        const ry=body.semiMinorAxis * Math.sin(time * body.speed);
+                        const r=Math.sqrt(Math.pow(rx,2)+Math.pow(ry,2));
+                        // Actualizar la posición de los planetas y sus órbitas
+                        if (body.orbitsEarth) {
+                            const earth = bodies['Tierra'];
+                            body.mesh.position.x = earth.mesh.position.x + rx;
+                            body.mesh.position.z = earth.mesh.position.z + ry*Math.cos(body.inclination*(Math.PI/180));
+                            } else {
+                            // Actualizar la posición de los planetas con base en su velocidad y órbita alrededor del Sol
+                            body.mesh.position.x = rx;
+                            body.mesh.position.z = ry*Math.cos(body.inclination*(Math.PI/180));;
+                            body.mesh.position.y = ry*Math.sin(body.inclination*(Math.PI/180));
+                        }
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Lógica del menú desplegable
+        const toggleButton = document.getElementById('toggle-button');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        toggleButton.addEventListener('click', () => {
+            const isVisible = dropdownMenu.style.display === 'flex';
+            dropdownMenu.style.display = isVisible ? 'none' : 'flex';
+            toggleButton.textContent = isVisible ? '▼' : '▲'; // Cambiar texto de la flecha
+        });
+
+        // Evento para reiniciar la vista
+        document.getElementById('resetButton').addEventListener('click', () => {
+            camera.position.set(25, 25, 50);
+            controls.target.set(0, 0, 0);
+            controls.update();
+            targetBody = null; // Reiniciar el objetivo
+        });
+
+        // Ajustar el tamaño del renderizador cuando la ventana cambie de tamaño
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+    </script>
+</body>
+</html>
